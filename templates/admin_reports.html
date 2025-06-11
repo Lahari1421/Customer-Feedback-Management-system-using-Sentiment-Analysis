@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Reports</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial; margin: 20px; background: #f9f9f9; }
+        h2 { margin-top: 40px; }
+        table, th, td {
+            border: 1px solid #999;
+            border-collapse: collapse;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>📊 Admin Dashboard</h1>
+
+    <h2>🏆 Top Feedback Customers</h2>
+    <table>
+        <tr><th>Name</th><th>Feedback Count</th></tr>
+        {% for name, count in top_customers %}
+            <tr><td>{{ name }}</td><td>{{ count }}</td></tr>
+        {% endfor %}
+    </table>
+
+    <h2>📦 Product-wise Sentiment</h2>
+    <table>
+        <tr><th>Product</th><th>Positives</th><th>Negatives</th><th>Neutrals</th></tr>
+        {% for row in product_sentiments %}
+            <tr>
+                {% for col in row %}
+                    <td>{{ col }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+    <h2>📅 Daily Sentiment Trend</h2>
+    <canvas id="dailyTrend" width="800" height="300"></canvas>
+
+    <h2>🌍 Country-wise Feedback</h2>
+    <table>
+        <tr><th>Country</th><th>Total Feedback</th></tr>
+        {% for row in country_feedback %}
+            <tr><td>{{ row[0] }}</td><td>{{ row[1] }}</td></tr>
+        {% endfor %}
+    </table>
+
+    <script>
+        const dates = {{ daily_sentiment | map(attribute=0) | list | tojson }};
+        const positive = {{ daily_sentiment | map(attribute=1) | list | tojson }};
+        const negative = {{ daily_sentiment | map(attribute=2) | list | tojson }};
+        const neutral  = {{ daily_sentiment | map(attribute=3) | list | tojson }};
+
+        new Chart(document.getElementById('dailyTrend'), {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Positive',
+                        data: positive,
+                        borderColor: 'green',
+                        fill: false
+                    },
+                    {
+                        label: 'Negative',
+                        data: negative,
+                        borderColor: 'red',
+                        fill: false
+                    },
+                    {
+                        label: 'Neutral',
+                        data: neutral,
+                        borderColor: 'gray',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: { display: true, text: 'Daily Sentiment Trends' }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
